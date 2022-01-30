@@ -16,52 +16,61 @@ const parsingData = (data) => {
 };
 
 const flashedToZero = (arr) => {
-    const [energyLvls, flashes] = arr;
-    const newEnergy = energyLvls.map(x => x.map(energy => !energy ? 0 : energy))
-    return [newEnergy, flashes];
-}
+  let syncFlash = true;
+  const [energyLvls, flashes] = arr;
+  const newEnergy = energyLvls.map((x) =>
+    x.map((energy) => {
+      if (!energy) return 0;
+      else {
+        syncFlash = false;
+        return energy;
+      }
+    })
+  );
+  return [newEnergy, flashes, syncFlash];
+};
 
 const flashing = (arr) => {
   let [energyLvls, flashes] = arr;
   const flash = (energyLvls, i, j) => {
-      // debugger
-    if (!energyLvls[i][j] || energyLvls[i][j] < 10) return
+    // debugger
+    if (!energyLvls[i][j] || energyLvls[i][j] < 10) return;
 
     flashes++;
     energyLvls[i][j] = undefined;
     if (i - 1 > -1) {
-        energyLvls[i - 1][j]++;
-        flash(energyLvls, i - 1, j);
-        if (j - 1 > -1) {
-            energyLvls[i - 1][j - 1]++;
-            flash(energyLvls, i - 1, j - 1);    
-        }
-        if (j + 1 < energyLvls[0].length) {
-            energyLvls[i - 1][j + 1]++;
-            flash(energyLvls, i - 1, j + 1);    
-        }
-    }    
+      energyLvls[i - 1][j]++;
+      flash(energyLvls, i - 1, j);
+      if (j - 1 > -1) {
+        energyLvls[i - 1][j - 1]++;
+        flash(energyLvls, i - 1, j - 1);
+      }
+      if (j + 1 < energyLvls[0].length) {
+        energyLvls[i - 1][j + 1]++;
+        flash(energyLvls, i - 1, j + 1);
+      }
+    }
     if (i + 1 < energyLvls.length) {
-        energyLvls[i + 1][j]++;
-        flash(energyLvls, i + 1, j);
-        if (j - 1 > -1) {
-            energyLvls[i + 1][j - 1]++;
-            flash(energyLvls, i + 1, j - 1);    
-        }
-        if (j + 1 < energyLvls[0].length) {
-            energyLvls[i + 1][j + 1]++;
-            flash(energyLvls, i + 1, j + 1);    
-        }
-    }    
+      energyLvls[i + 1][j]++;
+      flash(energyLvls, i + 1, j);
+      if (j - 1 > -1) {
+        energyLvls[i + 1][j - 1]++;
+        flash(energyLvls, i + 1, j - 1);
+      }
+      if (j + 1 < energyLvls[0].length) {
+        energyLvls[i + 1][j + 1]++;
+        flash(energyLvls, i + 1, j + 1);
+      }
+    }
     if (j - 1 > -1) {
-        energyLvls[i][j - 1] += 1;
-        flash(energyLvls, i, j - 1)
-    }    
+      energyLvls[i][j - 1] += 1;
+      flash(energyLvls, i, j - 1);
+    }
     if (j + 1 < energyLvls[0].length) {
-        energyLvls[i][j + 1] += 1;
-        flash(energyLvls, i, j + 1)
-    }    
-  }
+      energyLvls[i][j + 1] += 1;
+      flash(energyLvls, i, j + 1);
+    }
+  };
 
   for (let i = 0; i < energyLvls.length; i++) {
     for (let j = 0; j < energyLvls[i].length; j++) {
@@ -71,7 +80,7 @@ const flashing = (arr) => {
       }
     }
   }
-  return [energyLvls, flashes]
+  return [energyLvls, flashes];
 };
 
 const increaseEnergy = (energyLvls, flashes) => {
@@ -91,12 +100,13 @@ const totalFlashes = (energyLevels, steps) => {
   let energyLvls = R.clone(energyLevels);
   let i = 0;
   let flashes = 0;
-
+    let syncFlash;
   while (i < steps) {
-    [energyLvls, flashes] = performStep(energyLvls, flashes)
+    [energyLvls, flashes, syncFlash] = performStep(energyLvls, flashes);
+    if(syncFlash) return i + 1;
     i++;
   }
   return flashes;
 };
 
-console.log(totalFlashes(parsingData(input), 100))
+console.log(totalFlashes(parsingData(input), 300));
