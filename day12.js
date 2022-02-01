@@ -29,66 +29,56 @@ const parsingData = (data) => {
   return data.split("\n").map((e) => e.split("-"));
 };
 
-const createNodes = (arr) => {
-  const nodes = {};
-  arr.forEach((element) => {
-    element.forEach((node, j) => {
-      if (!nodes[node]) {
-        nodes[node] = [element[j + 1] || element[j - 1]];
+const createGraph = (arr) => {
+  const graph = {};
+
+  arr.forEach((nodes) => {
+    nodes.forEach((node, j) => {
+      if (node === "end" || (nodes[j + 1] || nodes[j - 1]) === "start") return;
+
+      if (!graph[node]) {
+        graph[node] = [nodes[j + 1] || nodes[j - 1]];
       } else {
-        nodes[node].push(element[j + 1] || element[j - 1]);
+        graph[node].push(nodes[j + 1] || nodes[j - 1]);
       }
     });
   });
-  for (const node in nodes) {
-    if (Object.hasOwnProperty.call(nodes, node)) {
-      const element = nodes[node];
-      nodes[node] = element.filter((e) => !(e === "start"));
-      if (node === "end") {
-        delete nodes[node];
-      }
-    }
-  }
-  return nodes;
+  return graph;
 };
 
-//  {
-//    start: [ 'A', 'b' ],
-//    A: [ 'c', 'b', 'end' ],
-//    b: [ 'A', 'd', 'end' ],
-//    c: [ 'A' ],
-//    d: [ 'b' ],
-//    end: [ 'A', 'b' ]
-//  }
 const isDuplicate = (node, path) => {
-  if (!isUpperCase(node) && path.indexOf(node) !== -1 && isAnyDuplicateSmall(node, path)) return true;
+  if (
+    !isUpperCase(node) &&
+    path.indexOf(node) !== -1 &&
+    isAnyDuplicateSmall(path)
+  )
+    return true;
   return false;
 };
 
-const isAnyDuplicateSmall = (node, path) => {
-    let output = false;
-    path.forEach((letter) => {
-        if (path.indexOf(letter) !== path.lastIndexOf(letter) && !isUpperCase(letter)) {
-            output = true;
-        }
-    })
-    return output;
-}
+const isAnyDuplicateSmall = (path) => {
+  let output = false;
+  path.forEach((letter) => {
+    if (
+      path.indexOf(letter) !== path.lastIndexOf(letter) &&
+      !isUpperCase(letter)
+    ) {
+      output = true;
+    }
+  });
+  return output;
+};
 const isUpperCase = (word) => word === word.toUpperCase();
 
 const distinctPaths = (graph) => {
   let paths = 0;
   let path = [];
+
   const findPath = (node) => {
     path.push(node);
     graph[node].forEach((nextNode) => {
-        if (nextNode === "end") {
-        path.push(nextNode);
-        paths++;
-        path.pop();
-      } else if (!isDuplicate(nextNode, path)) {
-        findPath(nextNode);
-      }
+      if (nextNode === "end") paths++;
+      else if (!isDuplicate(nextNode, path)) findPath(nextNode);
     });
     path.pop(node);
   };
@@ -96,4 +86,4 @@ const distinctPaths = (graph) => {
   return paths;
 };
 
-console.log(R.pipe(parsingData, createNodes, distinctPaths)(input));
+console.log(R.pipe(parsingData, createGraph, distinctPaths)(input));

@@ -33,42 +33,24 @@ const flashedToZero = (arr) => {
 const flashing = (arr) => {
   let [energyLvls, flashes] = arr;
   const flash = (energyLvls, i, j) => {
-    // debugger
     if (!energyLvls[i][j] || energyLvls[i][j] < 10) return;
 
     flashes++;
     energyLvls[i][j] = undefined;
-    if (i - 1 > -1) {
-      energyLvls[i - 1][j]++;
-      flash(energyLvls, i - 1, j);
-      if (j - 1 > -1) {
-        energyLvls[i - 1][j - 1]++;
-        flash(energyLvls, i - 1, j - 1);
+
+    for (let x = -1; x <= 1; x++) {
+      for (let y = -1; y <= 1; y++) {
+        if (x === 0 && y === 0) continue;
+
+        if (
+          energyLvls[i + x] === undefined ||
+          energyLvls[i + x][j + y] === undefined
+        )
+          continue;
+
+        energyLvls[i + x][j + y]++;
+        flash(energyLvls, i + x, j + y);
       }
-      if (j + 1 < energyLvls[0].length) {
-        energyLvls[i - 1][j + 1]++;
-        flash(energyLvls, i - 1, j + 1);
-      }
-    }
-    if (i + 1 < energyLvls.length) {
-      energyLvls[i + 1][j]++;
-      flash(energyLvls, i + 1, j);
-      if (j - 1 > -1) {
-        energyLvls[i + 1][j - 1]++;
-        flash(energyLvls, i + 1, j - 1);
-      }
-      if (j + 1 < energyLvls[0].length) {
-        energyLvls[i + 1][j + 1]++;
-        flash(energyLvls, i + 1, j + 1);
-      }
-    }
-    if (j - 1 > -1) {
-      energyLvls[i][j - 1] += 1;
-      flash(energyLvls, i, j - 1);
-    }
-    if (j + 1 < energyLvls[0].length) {
-      energyLvls[i][j + 1] += 1;
-      flash(energyLvls, i, j + 1);
     }
   };
 
@@ -100,13 +82,13 @@ const totalFlashes = (energyLevels, steps) => {
   let energyLvls = R.clone(energyLevels);
   let i = 0;
   let flashes = 0;
-    let syncFlash;
+  let syncFlash;
   while (i < steps) {
     [energyLvls, flashes, syncFlash] = performStep(energyLvls, flashes);
-    if(syncFlash) return i + 1;
+    if (syncFlash) return i + 1;
     i++;
   }
   return flashes;
 };
 
-console.log(totalFlashes(parsingData(input), 300));
+console.log(totalFlashes(parsingData(input), 400));
